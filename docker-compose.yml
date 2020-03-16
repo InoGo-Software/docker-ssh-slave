@@ -1,0 +1,9 @@
+version: "3"
+
+services:
+  jenkins-slave:
+    build: .
+    ports:
+      - "2222:22"
+    env_file:
+      - .env
