@@ -10,7 +10,7 @@
 - Remote root directory `/home/jenkins`
 - Launch method `Launch agents via SSH`
 - Host: public ip/hostname of slave
-- Credentials: Select private key credentials
+- Credentials: Select private key credentials with user: root if you need sudo rights otherwise jenkins
 - Host Key Verification Strategy: `Manually trusted key verification strategy`
 - Port: `2222`
 - JavaPath: `/usr/local/openjdk-8/bin/java`

@@ -1,0 +1,42 @@
+write_key() {
+  local ID_GROUP
+
+  # As user, group, uid, gid and JENKINS_AGENT_HOME can be overridden at build,
+  # we need to find the values for JENKINS_AGENT_HOME
+  # ID_GROUP contains the user:group of JENKINS_AGENT_HOME directory
+  ID_GROUP=$(stat -c '%U:%G' "${JENKINS_AGENT_HOME}")
+
+  # Generate folders for the jenkins user
+  mkdir -p "${JENKINS_AGENT_HOME}/.ssh"
+  echo "$1" > "${JENKINS_AGENT_HOME}/.ssh/authorized_keys"
+  chown -Rf "${ID_GROUP}" "${JENKINS_AGENT_HOME}/.ssh"
+  chmod 0700 -R "${JENKINS_AGENT_HOME}/.ssh"
+
+  # Generate ssh for the root user
+  mkdir -p /root/.ssh
+  echo "$1" > /root/.ssh/authorized_keys
+  # chown -Rf "${ID_GROUP}" /root/.ssh
+  # chmod 0700 -R /root/.ssh
+}
+
+if [[ ${JENKINS_SLAVE_SSH_PUBKEY} == ssh-* ]]; then
+  write_key "${JENKINS_SLAVE_SSH_PUBKEY}"
+fi
+if [[ $# -gt 0 ]]; then
+  if [[ $1 == ssh-* ]]; then
+    write_key "$1"
+    shift 1
+  else
+    exec "$@"
+  fi
+fi
+
+
+# ensure variables passed to docker container are also exposed to ssh sessions
+env | grep _ >> /etc/environment
+
+# generate host keys if not present
+ssh-keygen -A
+
+# do not detach (-D), log to stderr (-e), passthrough other arguments
+exec /usr/sbin/sshd -D -e "${@}"
