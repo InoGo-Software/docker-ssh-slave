@@ -1,3 +1,7 @@
+#!/usr/bin/env bash
+
+set -ex
+
 write_key() {
   local ID_GROUP
 
